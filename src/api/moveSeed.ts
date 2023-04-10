@@ -43,18 +43,18 @@ interface Type {
 
 export const squirtleMoves: Move[] = [
   {
-    name: "watergun",
+    name: "scratch",
     power: 40,
-    type: "water",
+    type: "normal",
     accuracy: 100,
     statMod: null,
     statModPercentage: null,
     effects: null,
   },
   {
-    name: "scratch",
+    name: "watergun",
     power: 40,
-    type: "normal",
+    type: "water",
     accuracy: 100,
     statMod: null,
     statModPercentage: null,

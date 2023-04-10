@@ -116,20 +116,20 @@ const BattleApp: React.FC<PokemonProps> = () => {
     );
     setTurnRecord(newTurnRecord);
   }
-
+  // this click handler does basically all of the logic.
   const handleMoveClick = (move: Move, source: string) => {
     let attackerStats = source === "p1" ? stats1 : stats2;
     let defenderStats = source === "p1" ? stats2 : stats1;
-
+    //crit rate
     const criticalHitRate = (attackerStats.speed * 100) / 512;
     const isCriticalHit = Math.random() * 100 <= criticalHitRate + 5;
-
+    // harcoded level for now. used in dmg equation
     let level = 5;
     if (isCriticalHit) {
       level = 10;
       console.log("Critical Hit");
     }
-
+    //init damage to 0 and then calculate damage from stats and move
     let damage = 0;
     if (move.power) {
       console.log("lvl:", level);
@@ -139,6 +139,7 @@ const BattleApp: React.FC<PokemonProps> = () => {
           (attackerStats.attack / defenderStats.defense)) /
           50 +
         2;
+      //random dice roll for dmg
       const randomFactor = Math.floor(Math.random() * (255 - 217 + 1) + 217); // Generates a random integer between 217 and 255 (inclusive)
       damage = Math.floor((baseDamage * randomFactor) / 255);
       console.log("dmg:", damage);
@@ -147,6 +148,7 @@ const BattleApp: React.FC<PokemonProps> = () => {
     } else {
       damage = 0;
     }
+    //condition conditional. sets condition on target in move has condition value(just leech for now. prob switch case later)
     if (defenderStats.hasCondition && defenderStats.condition === "leech") {
       const damageFraction = 1 / 16;
       const damage = Math.floor(defenderStats.hp * damageFraction);
@@ -176,7 +178,7 @@ const BattleApp: React.FC<PokemonProps> = () => {
           break;
       }
     }
-
+    // stage or stat mod logic.
     switch (move.statMod) {
       case "attack":
         const attackMod =
@@ -200,12 +202,12 @@ const BattleApp: React.FC<PokemonProps> = () => {
         }
         break;
     }
-
+    //type advantage logic
     if (defenderStats.type.weakness.includes(move.type)) {
       damage *= 2;
       console.log("TypeAdvDmg:", damage);
     }
-
+    //final damage logic
     let hp = source === "p1" ? p2HP - damage : p1HP - damage;
 
     hp = Math.max(0, hp);
@@ -214,6 +216,7 @@ const BattleApp: React.FC<PokemonProps> = () => {
       defender: pokemonSeed[2].name,
       moveUsed: lastMoveUsed,
     };
+    // conditional damage application logic.
     if (source === "p1") {
       let conDMG = 0;
       if (stats2.hasCondition && stats2.condition === "leech") {
@@ -226,7 +229,7 @@ const BattleApp: React.FC<PokemonProps> = () => {
       } else {
         setP1HP(p1HP + conDMG);
       }
-
+      //end of turn logic.
       setLastMoveUsed(move);
       handleAddTurn(pokemonSeed[0].name, pokemonSeed[2].name, move);
       setTimeout(() => setPlayerTurn(false), 0);
@@ -249,13 +252,14 @@ const BattleApp: React.FC<PokemonProps> = () => {
 
     console.log("move:", move); // do something with the move data
   };
-
+  //sets initial health based on the chosen pokemons hp stat.
   useEffect(() => {
     setP1HP(pokemonSeed[0]?.stats.hp);
     setP2HP(pokemonSeed[2]?.stats.hp);
   }, [pokemonSeed]);
 
   if (playerTurn) {
+    //player 1 turn display
     return (
       <div>
         <div>
@@ -304,6 +308,7 @@ const BattleApp: React.FC<PokemonProps> = () => {
       </div>
     );
   } else {
+    //player 2 turn display
     return (
       <div>
         <div>
