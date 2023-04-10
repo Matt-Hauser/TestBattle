@@ -83,6 +83,21 @@ const BattleApp: React.FC<PokemonProps> = () => {
   const initialTurnRecord = new Map<number, Turn>();
   const [turnRecord, setTurnRecord] = useState(initialTurnRecord);
 
+  const [isLeft, setIsLeft] = React.useState(false);
+  //janky animation
+  const springProps = useSpring({
+    to: async (next, cancel) => {
+      await next({ left: isLeft ? "calc(0% - 20px)" : "calc(0% + 30px)" });
+      await next({ left: "calc(0% - 10px)" });
+      await next({ left: "calc(0% - 15px)" });
+
+      await next({ left: "0" });
+      setIsLeft(!isLeft);
+    },
+    from: { left: "0%" },
+    config: { tension: 300, friction: 10 },
+  });
+
   //   useEffect(() => {
   //     dispatch(fetchPokemon());
   //   }, [dispatch]);
@@ -223,16 +238,20 @@ const BattleApp: React.FC<PokemonProps> = () => {
         const damageFraction = 1 / 16;
         conDMG = Math.floor(defenderStats.hp * damageFraction + 1);
       }
-      setP2HP(hp - conDMG);
-      if (p1HP > pokemonSeed[0].stats.hp) {
-        setP1HP(pokemonSeed[0].stats.hp);
-      } else {
-        setP1HP(p1HP + conDMG);
+
+      setTimeout(() => setP2HP(hp - conDMG), 3000);
+      if (p2HP < 0) {
+        setTimeout(() => setP2HP(0), 3000);
       }
-      //end of turn logic.
+      if (p1HP > pokemonSeed[0].stats.hp) {
+        setTimeout(() => setP1HP(pokemonSeed[0].stats.hp), 3000);
+      } else {
+        setTimeout(() => setP1HP(p1HP + conDMG), 3000);
+      }
+
       setLastMoveUsed(move);
       handleAddTurn(pokemonSeed[0].name, pokemonSeed[2].name, move);
-      setTimeout(() => setPlayerTurn(false), 0);
+      setTimeout(() => setPlayerTurn(false), 4000);
     } else if (source === "p2") {
       let conDMG = 0;
       if (stats1.hasCondition && stats1.condition === "leech") {
@@ -240,14 +259,17 @@ const BattleApp: React.FC<PokemonProps> = () => {
         conDMG = Math.floor(defenderStats.hp * damageFraction + 1);
       }
       if (p2HP >= pokemonSeed[2].stats.hp) {
-        setP2HP(pokemonSeed[2].stats.hp);
+        setTimeout(() => setP2HP(pokemonSeed[2].stats.hp), 3000);
       } else {
-        setP2HP(p2HP + conDMG);
+        setTimeout(() => setP2HP(p2HP + conDMG), 3000);
       }
-      setP1HP(hp - conDMG);
+      setTimeout(() => setP1HP(hp - conDMG), 3000);
+      if (p1HP < 0) {
+        setTimeout(() => setP1HP(0), 3000);
+      }
       setLastMoveUsed(move);
       handleAddTurn(pokemonSeed[2].name, pokemonSeed[0].name, move);
-      setTimeout(() => setPlayerTurn(true), 0);
+      setTimeout(() => setPlayerTurn(true), 4000);
     }
 
     console.log("move:", move); // do something with the move data
@@ -258,105 +280,131 @@ const BattleApp: React.FC<PokemonProps> = () => {
     setP2HP(pokemonSeed[2]?.stats.hp);
   }, [pokemonSeed]);
 
-  if (playerTurn) {
-    //player 1 turn display
-    return (
-      <div>
+  return (
+    <div>
+      {playerTurn ? (
         <div>
-          <div style={{ position: "relative", left: "50px" }}>
-            {pokemonSeed[2]?.name}
+          <div>
+            <div style={{ position: "relative", left: "50px" }}>
+              {pokemonSeed[2]?.name}
+            </div>
+            <div>
+              <HealthBar
+                currentHP={p2HP}
+                originalHP={pokemonSeed[2].stats.hp}
+              />
+              <img
+                style={{ position: "relative", left: "50px" }}
+                src={pokemonSeed[2]?.image}
+                alt={pokemonSeed[2]?.name}
+              />
+            </div>
           </div>
           <div>
-            <HealthBar currentHP={p2HP} originalHP={pokemonSeed[2].stats.hp} />
-            <img
-              style={{ position: "relative", left: "50px" }}
-              src={pokemonSeed[2]?.image}
-              alt={pokemonSeed[2]?.name}
-            />
-          </div>
-        </div>
-        <div>
-          <animated.img
-            style={{ position: "relative", right: "50px" }}
-            src={pokemonSeed[0]?.imageBack}
-            alt={pokemonSeed[0]?.name}
-          />
-          <div style={{ position: "relative", right: "50px" }}>
-            {pokemonSeed[0]?.name}
-          </div>
-          <div>
-            <HealthBar currentHP={p1HP} originalHP={pokemonSeed[0].stats.hp} />
-            {pokemonSeed[0]?.moves.slice(0, 4).map((move) => (
-              <button
-                key={move.name}
-                onClick={() => handleMoveClick(move, "p1")}
-              >
-                {move.name}
-              </button>
-            ))}
-          </div>
-          <div>
-            {lastMoveUsed ? (
-              <p>
-                {pokemonSeed[2].name} used {lastMoveUsed.name}
-              </p>
-            ) : (
-              <></>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  } else {
-    //player 2 turn display
-    return (
-      <div>
-        <div>
-          <div style={{ position: "relative", left: "50px" }}>
-            {pokemonSeed[0]?.name}
-          </div>
-          <div>
-            <HealthBar currentHP={p1HP} originalHP={pokemonSeed[0].stats.hp} />
-            <img
-              style={{ position: "relative", left: "50px" }}
-              src={pokemonSeed[0]?.image}
+            <animated.img
+              style={{
+                position: "relative",
+                right: "0px",
+                zIndex: 1,
+                width: "150px",
+                height: "150px",
+
+                ...springProps,
+              }}
+              src={pokemonSeed[0]?.imageBack}
               alt={pokemonSeed[0]?.name}
             />
+            <div style={{ position: "relative", right: "50px" }}>
+              {pokemonSeed[0]?.name}
+            </div>
+            <div>
+              <HealthBar
+                currentHP={p1HP}
+                originalHP={pokemonSeed[0].stats.hp}
+              />
+              {pokemonSeed[0]?.moves.slice(0, 4).map((move) => (
+                <button
+                  key={move.name}
+                  onClick={() => handleMoveClick(move, "p1")}
+                >
+                  {move.name}
+                </button>
+              ))}
+            </div>
+            <div>
+              {lastMoveUsed ? (
+                <p>
+                  {pokemonSeed[2].name} used {lastMoveUsed.name}
+                </p>
+              ) : (
+                <></>
+              )}
+            </div>
           </div>
         </div>
+      ) : (
         <div>
-          <img
-            style={{ position: "relative", right: "50px" }}
-            src={pokemonSeed[2]?.imageBack}
-            alt={pokemonSeed[2]?.name}
-          />
-          <div style={{ position: "relative", right: "50px" }}>
-            {pokemonSeed[2]?.name}
+          <div>
+            <div style={{ position: "relative", left: "50px" }}>
+              {pokemonSeed[0]?.name}
+            </div>
+            <div>
+              <HealthBar
+                currentHP={p1HP}
+                originalHP={pokemonSeed[0].stats.hp}
+              />
+              <img
+                style={{ position: "relative", left: "50px" }}
+                src={pokemonSeed[0]?.image}
+                alt={pokemonSeed[0]?.name}
+              />
+            </div>
           </div>
           <div>
-            <HealthBar currentHP={p2HP} originalHP={pokemonSeed[2].stats.hp} />
-            {pokemonSeed[2]?.moves.slice(0, 4).map((move) => (
-              <button
-                key={move.name}
-                onClick={() => handleMoveClick(move, "p2")}
-              >
-                {move.name}
-              </button>
-            ))}
-          </div>
-          <div>
-            {lastMoveUsed ? (
-              <p>
-                {pokemonSeed[0].name} used {lastMoveUsed.name}
-              </p>
-            ) : (
-              <></>
-            )}
+            <animated.img
+              style={{
+                position: "relative",
+                right: "0px",
+                zIndex: 1,
+                width: "150px",
+                height: "150px",
+
+                ...springProps,
+              }}
+              src={pokemonSeed[2]?.imageBack}
+              alt={pokemonSeed[2]?.name}
+            />
+            <div style={{ position: "relative", right: "50px" }}>
+              {pokemonSeed[2]?.name}
+            </div>
+            <div>
+              <HealthBar
+                currentHP={p2HP}
+                originalHP={pokemonSeed[2].stats.hp}
+              />
+              {pokemonSeed[2]?.moves.slice(0, 4).map((move) => (
+                <button
+                  key={move.name}
+                  onClick={() => handleMoveClick(move, "p2")}
+                >
+                  {move.name}
+                </button>
+              ))}
+            </div>
+            <div>
+              {lastMoveUsed ? (
+                <p>
+                  {pokemonSeed[0].name} used {lastMoveUsed.name}
+                </p>
+              ) : (
+                <></>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
 };
 
 export default BattleApp;
