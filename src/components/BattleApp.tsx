@@ -6,6 +6,10 @@ import { fetchPokemon } from "../slices/pokemonSlice";
 import { pokemonSeed, Move, typeAdvantage, Stats } from "../api/moveSeed";
 import { useSpring, animated } from "react-spring";
 import HealthBar from "./HealthBar";
+import { border } from "@mui/system";
+import { relative } from "path";
+import { Button, Card, createTheme } from "@mui/material";
+import { blue, green, red, yellow, grey } from "@mui/material/colors";
 
 interface PokemonProps {
   id1: number;
@@ -35,6 +39,18 @@ interface HealthBarProps {
   currentHP: number;
   originalHP: number;
 }
+
+const { palette } = createTheme();
+const { augmentColor } = palette;
+const createColor = (mainColor) => augmentColor({ color: { main: mainColor } });
+const theme = createTheme({
+  palette: {
+    normal: createColor("#999"),
+    water: createColor("#53afe4"),
+    grass: createColor("#53e475"),
+    fire: createColor("#e47053"),
+  },
+});
 
 // const HealthBar: React.FC<HealthBarProps> = ({ currentHP, originalHP }) => {
 //   const percentage = (currentHP / originalHP) * 100;
@@ -307,12 +323,29 @@ const BattleApp: React.FC<PokemonProps> = () => {
     setP2HP(pokemonSeed[2]?.stats.hp);
   }, [pokemonSeed]);
 
+  function getColorByType(type: string) {
+    switch (type) {
+      case "fire":
+        return red[500];
+      case "water":
+        return blue[500];
+      case "grass":
+        return green[500];
+      case "normal":
+        return grey[500];
+      default:
+        return grey[500];
+    }
+  }
+
   return (
     <div>
       {playerTurn ? (
         <div>
           <div>
-            <div style={{ position: "relative", left: "20px" }}>
+            <div
+              style={{ position: "relative", left: "-100px", color: "black" }}
+            >
               {pokemonSeed[2]?.name}
             </div>
             <div>
@@ -341,7 +374,9 @@ const BattleApp: React.FC<PokemonProps> = () => {
               src={pokemonSeed[0]?.imageBack}
               alt={pokemonSeed[0]?.name}
             />
-            <div style={{ position: "relative", right: "50px" }}>
+            <div
+              style={{ position: "relative", left: "100px", color: "black" }}
+            >
               {pokemonSeed[0]?.name}
             </div>
             <div>
@@ -349,24 +384,50 @@ const BattleApp: React.FC<PokemonProps> = () => {
                 currentHP={p1HP}
                 originalHP={pokemonSeed[0].stats.hp}
               />
+              <br />
               {!hideButtons ? (
-                pokemonSeed[0]?.moves.slice(0, 4).map((move) => (
-                  <button
-                    key={move.name}
-                    onClick={() => handleMoveClick(move, "p1")}
-                  >
-                    {move.name}
-                  </button>
-                ))
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: "16px",
+                    width: "70%",
+                    position: "relative",
+                    left: "10%",
+                  }}
+                >
+                  {pokemonSeed[0]?.moves.slice(0, 4).map((move) => (
+                    <Button
+                      variant="contained"
+                      key={move.name}
+                      onClick={() => handleMoveClick(move, "p1")}
+                      style={{
+                        backgroundColor: getColorByType(move.type),
+                        height: "100%",
+                      }}
+                    >
+                      {move.name}
+                    </Button>
+                  ))}
+                </div>
               ) : (
                 <></>
               )}
             </div>
             <div>
               {lastMoveUsed && attacked ? (
-                <p>
-                  {pokemonSeed[0].name} used {lastMoveUsed.name}
-                </p>
+                <Card
+                  style={{
+                    border: "solid 2px",
+                    width: "50%",
+                    position: "relative",
+                    left: "150px",
+                  }}
+                >
+                  <p>
+                    {pokemonSeed[0].name} used {lastMoveUsed.name}
+                  </p>
+                </Card>
               ) : (
                 <></>
               )}
@@ -376,7 +437,9 @@ const BattleApp: React.FC<PokemonProps> = () => {
       ) : (
         <div>
           <div>
-            <div style={{ position: "relative", left: "50px" }}>
+            <div
+              style={{ color: "black", position: "relative", left: "-100px" }}
+            >
               {pokemonSeed[0]?.name}
             </div>
             <div>
@@ -405,7 +468,9 @@ const BattleApp: React.FC<PokemonProps> = () => {
               src={pokemonSeed[2]?.imageBack}
               alt={pokemonSeed[2]?.name}
             />
-            <div style={{ position: "relative", right: "50px" }}>
+            <div
+              style={{ position: "relative", left: "100px", color: "black" }}
+            >
               {pokemonSeed[2]?.name}
             </div>
             <div>
@@ -413,24 +478,50 @@ const BattleApp: React.FC<PokemonProps> = () => {
                 currentHP={p2HP}
                 originalHP={pokemonSeed[2].stats.hp}
               />
+              <br />
               {!hideButtons ? (
-                pokemonSeed[2]?.moves.slice(0, 4).map((move) => (
-                  <button
-                    key={move.name}
-                    onClick={() => handleMoveClick(move, "p2")}
-                  >
-                    {move.name}
-                  </button>
-                ))
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: "16px",
+                    width: "70%",
+                    position: "relative",
+                    left: "10%",
+                  }}
+                >
+                  {pokemonSeed[2]?.moves.slice(0, 4).map((move) => (
+                    <Button
+                      variant="contained"
+                      key={move.name}
+                      onClick={() => handleMoveClick(move, "p2")}
+                      style={{
+                        backgroundColor: getColorByType(move.type),
+                        height: "100%",
+                      }}
+                    >
+                      {move.name}
+                    </Button>
+                  ))}
+                </div>
               ) : (
                 <></>
               )}
             </div>
             <div>
               {lastMoveUsed && attacked ? (
-                <p>
-                  {pokemonSeed[2].name} used {lastMoveUsed.name}
-                </p>
+                <Card
+                  style={{
+                    border: "solid 2px",
+                    width: "50%",
+                    position: "relative",
+                    left: "150px",
+                  }}
+                >
+                  <p>
+                    {pokemonSeed[2].name} used {lastMoveUsed.name}
+                  </p>
+                </Card>
               ) : (
                 <></>
               )}
