@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { fetchPokemon } from "../slices/pokemonSlice";
 import { pokemonSeed, Move, typeAdvantage, Stats } from "../api/moveSeed";
 import { useSpring, animated } from "react-spring";
+import HealthBar from "./HealthBar";
 
 interface PokemonProps {
   id1: number;
@@ -35,36 +36,36 @@ interface HealthBarProps {
   originalHP: number;
 }
 
-const HealthBar: React.FC<HealthBarProps> = ({ currentHP, originalHP }) => {
-  const percentage = (currentHP / originalHP) * 100;
+// const HealthBar: React.FC<HealthBarProps> = ({ currentHP, originalHP }) => {
+//   const percentage = (currentHP / originalHP) * 100;
 
-  return (
-    <div
-      style={{ display: "flex", justifyContent: "center", textAlign: "center" }}
-    >
-      <div
-        style={{
-          backgroundColor: "gray",
-          height: 10,
-          width: "50vw",
-          display: "flex",
-          justifySelf: "center",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "green",
-            height: 10,
-            width: `${percentage}%`,
-          }}
-        />
-      </div>
-      <div>
-        {currentHP}/{originalHP}
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div
+//       style={{ display: "flex", justifyContent: "center", textAlign: "center" }}
+//     >
+//       <div
+//         style={{
+//           backgroundColor: "gray",
+//           height: 10,
+//           width: "50vw",
+//           display: "flex",
+//           justifySelf: "center",
+//         }}
+//       >
+//         <div
+//           style={{
+//             backgroundColor: "green",
+//             height: 10,
+//             width: `${percentage}%`,
+//           }}
+//         />
+//       </div>
+//       <div>
+//         {currentHP}/{originalHP}
+//       </div>
+//     </div>
+//   );
+// };
 
 const BattleApp: React.FC<PokemonProps> = () => {
   const dispatch = useDispatch();
@@ -80,8 +81,9 @@ const BattleApp: React.FC<PokemonProps> = () => {
   const [turnRecord, setTurnRecord] = useState(initialTurnRecord);
 
   const [attacked, setAttacked] = useState(false);
-
+  const [shouldAnimate, setShouldAnimate] = useState(false);
   const isAninamting = useRef(false);
+
   //janky animation
   const springProps = useSpring({
     to: async (next, cancel) => {
@@ -93,6 +95,11 @@ const BattleApp: React.FC<PokemonProps> = () => {
     from: { left: "0%" },
     config: { tension: 300, friction: 10 },
   });
+  useEffect(() => {
+    if (attacked) {
+      setShouldAnimate(true);
+    }
+  }, [attacked]);
 
   const props = useSpring({
     to: async (next) => {
@@ -103,6 +110,8 @@ const BattleApp: React.FC<PokemonProps> = () => {
           : { marginLeft: 0 }
       ); // jump back to the right by 50 pixels and bounce slightly over 0.5 seconds
       await next(attacked ? { marginLeft: -10 } : { marginLeft: 0 }); // return to starting position over 1 second
+      setShouldAnimate(false);
+      setAttacked(false);
     },
     from: { marginLeft: -10 },
     config: { tension: 300, friction: 20 }, // adjust these values for the desired animation effect
@@ -148,6 +157,7 @@ const BattleApp: React.FC<PokemonProps> = () => {
     let defenderStats = source === "p1" ? stats2 : stats1;
 
     setAttacked(true);
+
     //crit rate
     const criticalHitRate = (attackerStats.speed * 100) / 512;
     const isCriticalHit = Math.random() * 100 <= criticalHitRate + 5;
@@ -254,14 +264,14 @@ const BattleApp: React.FC<PokemonProps> = () => {
         conDMG = Math.floor(defenderStats.hp * damageFraction + 1);
       }
 
-      setTimeout(() => setP2HP(hp - conDMG), 2500);
+      setTimeout(() => setP2HP(hp - conDMG), 2000);
       if (p2HP < 0) {
-        setTimeout(() => setP2HP(0), 2500);
+        setTimeout(() => setP2HP(0), 2000);
       }
       if (p1HP > pokemonSeed[0].stats.hp) {
-        setTimeout(() => setP1HP(pokemonSeed[0].stats.hp), 2500);
+        setTimeout(() => setP1HP(pokemonSeed[0].stats.hp), 2000);
       } else {
-        setTimeout(() => setP1HP(p1HP + conDMG), 2500);
+        setTimeout(() => setP1HP(p1HP + conDMG), 2000);
       }
 
       setLastMoveUsed(move);
@@ -276,13 +286,13 @@ const BattleApp: React.FC<PokemonProps> = () => {
         conDMG = Math.floor(defenderStats.hp * damageFraction + 1);
       }
       if (p2HP >= pokemonSeed[2].stats.hp) {
-        setTimeout(() => setP2HP(pokemonSeed[2].stats.hp), 2500);
+        setTimeout(() => setP2HP(pokemonSeed[2].stats.hp), 2000);
       } else {
-        setTimeout(() => setP2HP(p2HP + conDMG), 2500);
+        setTimeout(() => setP2HP(p2HP + conDMG), 2000);
       }
-      setTimeout(() => setP1HP(hp - conDMG), 2500);
+      setTimeout(() => setP1HP(hp - conDMG), 2000);
       if (p1HP < 0) {
-        setTimeout(() => setP1HP(0), 2500);
+        setTimeout(() => setP1HP(0), 2000);
       }
       setLastMoveUsed(move);
       handleAddTurn(pokemonSeed[2].name, pokemonSeed[0].name, move);
