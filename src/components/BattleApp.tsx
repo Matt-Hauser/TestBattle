@@ -363,9 +363,9 @@ const BattleApp: React.FC<PokemonProps> = () => {
               )}
             </div>
             <div>
-              {lastMoveUsed ? (
+              {lastMoveUsed && attacked ? (
                 <p>
-                  {pokemonSeed[2].name} used {lastMoveUsed.name}
+                  {pokemonSeed[0].name} used {lastMoveUsed.name}
                 </p>
               ) : (
                 <></>
@@ -427,9 +427,9 @@ const BattleApp: React.FC<PokemonProps> = () => {
               )}
             </div>
             <div>
-              {lastMoveUsed ? (
+              {lastMoveUsed && attacked ? (
                 <p>
-                  {pokemonSeed[0].name} used {lastMoveUsed.name}
+                  {pokemonSeed[2].name} used {lastMoveUsed.name}
                 </p>
               ) : (
                 <></>
