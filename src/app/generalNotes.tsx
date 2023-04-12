@@ -17,8 +17,8 @@ const conditions = [
 ];
 interface TurnRecord {
   turnNumber: number;
-  playerMove: UserMove;
-  opponentMove: UserMove;
+  playerTurn: UserTurn;
+  opponentTurn: UserTurn;
   results: {
     dmgTaken: {
       player: number;
@@ -104,7 +104,7 @@ interface TurnRecord {
   };
 }
 
-interface UserMove {
+interface UserTurn {
   pokemonStats: Stats;
   stages: {
     attack: number;
@@ -118,29 +118,29 @@ interface UserMove {
   action: Move | Item | Pokemon | null;
 }
 
-function calculatePriority(playerMove: UserMove, opponentMove: UserMove) {
+function calculatePriority(playerTurn: UserTurn, opponentTurn: UserTurn) {
   let firstPriority = "No Priority";
 
   const randomChoice = Math.floor(Math.random() * 100) + 1;
   let randomResult = null;
   if (randomChoice > 50) {
-    randomResult = playerMove.user;
+    randomResult = playerTurn.user;
   } else {
-    randomResult = opponentMove.user;
+    randomResult = opponentTurn.user;
   }
 
-  if (playerMove.action?.priority > opponentMove.action?.priority) {
-    firstPriority = playerMove.user;
-  } else if (playerMove.action?.priority < opponentMove.action?.priority) {
-    firstPriority = opponentMove.user;
+  if (playerTurn.action?.priority > opponentTurn.action?.priority) {
+    firstPriority = playerTurn.user;
+  } else if (playerTurn.action?.priority < opponentTurn.action?.priority) {
+    firstPriority = opponentTurn.user;
   } else {
     // If move priorities are equal, compare speeds
-    if (playerMove.pokemonStats.speed > opponentMove.pokemonStats.speed) {
-      firstPriority = playerMove.user;
+    if (playerTurn.pokemonStats.speed > opponentTurn.pokemonStats.speed) {
+      firstPriority = playerTurn.user;
     } else if (
-      playerMove.pokemonStats.speed > opponentMove.pokemonStats.speed
+      playerTurn.pokemonStats.speed > opponentTurn.pokemonStats.speed
     ) {
-      firstPriority = opponentMove.user;
+      firstPriority = opponentTurn.user;
     } else {
       firstPriority = randomResult;
     }
@@ -148,6 +148,135 @@ function calculatePriority(playerMove: UserMove, opponentMove: UserMove) {
 
   return firstPriority;
 }
+
+function handleAnimation(animationType) {
+  switch (animationType) {
+    case "physical":
+      return useSpring({
+        // animation logic for physical type
+      });
+    case "special":
+      return useSpring({
+        // animation logic for special type
+      });
+    case "heal":
+      return useSpring({
+        // animation logic for heal type
+      });
+    case "stageMod":
+      return useSpring({
+        // animation logic for stageMod type
+      });
+    case "status":
+      return useSpring({
+        // animation logic for status type
+      });
+    default:
+      return null;
+  }
+}
+// usage example
+const animationType = "physical";
+const animationProps = handleAnimation(animationType);
+
+// animate with React Spring
+useSpring(animationProps);
+
+function calculateDamage(
+  attackerTurn: UserTurn,
+  defenderTurn: UserTurn
+): number {
+  const attackerStats = attackerTurn.pokemonStats;
+  const defenderStats = defenderTurn.pokemonStats;
+
+  if (!attackerTurn.action?.power) {
+    return 0;
+  }
+
+  const baseDamage =
+    (((2 * attackerStats.lvl) / 5 + 2) *
+      attackerTurn.action.power *
+      (attackerStats.attack / defenderStats.defense)) /
+      50 +
+    2;
+
+  const randomFactor = Math.floor(Math.random() * (255 - 217 + 1) + 217);
+  const damage = Math.floor((baseDamage * randomFactor) / 255);
+
+  return damage;
+}
+
+function getTypeEffectiveness(
+  attackerType: string | undefined,
+  defenderType: Type
+): number {
+  let effect = 1;
+
+  if (attackerType) {
+    if (defenderType.weakness.includes(attackerType)) {
+      effect = 1.5;
+    } else if (defenderType.resistance.includes(attackerType)) {
+      effect = -1.5;
+    }
+  }
+
+  return effect;
+}
+
+function rollCritChance(): number {
+  // Generate a random number between 0 and 100
+  const roll = Math.floor(Math.random() * 100);
+
+  // Return 1.5 if the roll is less than or equal to 4.17, otherwise return 1
+  return roll <= 4.17 ? 1.5 : 1;
+}
+
+function calculatePlayerTurn(
+  playerTurn: UserTurn,
+  opponentTurn: UserTurn
+): number {
+  const attackerTurn = playerTurn;
+  const defenderTurn = opponentTurn;
+
+  const { action: { type: attackerMoveType } = {} } = attackerTurn;
+  const {
+    pokemonStats: { type: defenderPokemonType },
+  } = defenderTurn;
+
+  const typeMultiplier = getTypeEffectiveness(
+    attackerMoveType,
+    defenderPokemonType
+  );
+  const baseDamage = calculateDamage(attackerTurn, defenderTurn);
+  const critMultiplier = rollCritChance();
+}
+
+function calculateOpponentTurn(
+  opponentTurn: UserTurn,
+  playerTurn: UserTurn
+): number {
+  const attackerTurn = opponentTurn;
+  const defenderTurn = playerTurn;
+
+  const { action: { type: attackerMoveType } = {} } = attackerTurn;
+  const {
+    pokemonStats: { type: defenderPokemonType },
+  } = defenderTurn;
+
+  getTypeEffectiveness(attackerMoveType, defenderPokemonType);
+}
+
+//   function calculatePlayerTurn(playerTurn: UserTurn, opponentTurn: UserTurn): number {
+//     const playerType = playerTurn.action?.type;
+//     const opponentType = opponentTurn.pokemonStats.type;
+//     return getTypeEffectiveness(playerType, opponentType);
+//   }
+
+//   function calculateOpponentTurn(opponentTurn: UserTurn, playerTurn: UserTurn): number {
+//     const opponentType = opponentTurn.action?.type;
+//     const playerType = playerTurn.pokemonStats.type;
+//     return getTypeEffectiveness(opponentType, playerType);
+//   }
 
 // function priorityCalculator(turnObject) {
 //     const [firstPriority, setFirstPriority] = useState('No Priority');
@@ -159,10 +288,10 @@ function calculatePriority(playerMove: UserMove, opponentMove: UserMove) {
 //             randomResult = opponent
 //         }
 
-//     if (playerMove.priority > opponentMove.priority) {
+//     if (playerTurn.priority > opponentTurn.priority) {
 //      setFirstPriority(player) }
 
-//      else if (playerMove.priority < opponentMove.priority) {
+//      else if (playerTurn.priority < opponentTurn.priority) {
 //         setFirstPriority(opponent) }
 
 //      else {
@@ -180,18 +309,18 @@ function calculatePriority(playerMove: UserMove, opponentMove: UserMove) {
 
 // }
 
-// const priority = (playerMove.priority = opponentMove.priority) ? none:
+// const priority = (playerTurn.priority = opponentTurn.priority) ? none:
 
 //conditions are burn, freeze, paralysis, poison, bad poison, and sleep
 //effects are more specific but can be really similar to conditions (ie Leech Seed)
 
 //INTERFACES FOR NEW BATTLEAPP
 interface CurrentTurnData {
-  playerMove: UserMove;
-  opponentMove: UserMove;
+  playerTurn: UserTurn;
+  opponentTurn: UserTurn;
 }
-
-interface UserMove {
+//add weather. weather is implemented from the move objects effects value
+interface UserTurn {
   pokemonStats: Stats;
   stages: {
     attack: number;
@@ -215,6 +344,7 @@ export interface Pokemon {
 }
 
 export interface Stats {
+  lvl: number;
   hp: number;
   attack: number;
   defense: number;
@@ -236,6 +366,8 @@ export interface Move {
   type: string;
   accuracy: number;
   priority: number;
+  contact: boolean;
+  hitType: string;
   stageMod: {
     name: string | null;
     amount: number | null;
@@ -274,6 +406,8 @@ const moves: Move[] = [
     animationType: "physical",
     description:
       "A physical attack in which the user charges and slams into the target with its whole body.",
+    hitType: "physical",
+    contact: true,
   },
 
   {
@@ -297,6 +431,8 @@ const moves: Move[] = [
     animationType: "special",
     description:
       "A strong electric attack that may also leave the target paralyzed. It has a one-in-ten chance of paralyzing the target.",
+    hitType: "special",
+    contact: false,
   },
   {
     name: "Psychic",
@@ -310,6 +446,8 @@ const moves: Move[] = [
     animationType: "special",
     description:
       "The target is hit by a strong telekinetic force. This may also lower the target's Sp. Def stat.",
+    hitType: "special",
+    contact: false,
   },
   {
     name: "Earthquake",
@@ -323,6 +461,8 @@ const moves: Move[] = [
     animationType: "physical",
     description:
       "The user sets off an earthquake that strikes every Pokemon around it.",
+    hitType: "physical",
+    contact: false,
   },
   {
     name: "Ice Beam",
@@ -336,6 +476,8 @@ const moves: Move[] = [
     animationType: "special",
     description:
       "The target is struck with an icy-cold beam of energy. This may also leave the target frozen.",
+    hitType: "special",
+    contact: false,
   },
   {
     name: "Dragon Claw",
@@ -348,6 +490,8 @@ const moves: Move[] = [
     effects: { name: null, chance: null },
     animationType: "physical",
     description: "The user slashes the target with huge, sharp claws.",
+    hitType: "physical",
+    contact: true,
   },
   {
     name: "Bite",
@@ -361,6 +505,8 @@ const moves: Move[] = [
     animationType: "physical",
     description:
       "The user bites the target with its sharp teeth. This may also make the target flinch.",
+    hitType: "physical",
+    contact: true,
   },
   {
     name: "Scratch",
@@ -374,6 +520,8 @@ const moves: Move[] = [
     animationType: "physical",
     description:
       "Hard, pointed, and sharp claws rake the target to inflict damage.",
+    hitType: "physical",
+    contact: true,
   },
   {
     name: "Fire Fang",
@@ -387,11 +535,13 @@ const moves: Move[] = [
     animationType: "physical",
     description:
       "The user bites with flame-cloaked fangs. This may also make the target flinch or leave it with a burn.",
+    hitType: "physical",
+    contact: true,
   },
   {
     name: "Leech Seed",
     power: 0,
-    type: "grass",
+    type: "Grass",
     accuracy: 90,
     priority: 0,
     stageMod: { name: null, amount: null },
@@ -400,11 +550,13 @@ const moves: Move[] = [
     animationType: "status",
     description:
       "A seed is planted on the target. It steals some HP from the target every turn.",
+    hitType: "status",
+    contact: false,
   },
   {
     name: "Air Slash",
     power: 75,
-    type: "flying",
+    type: "Flying",
     accuracy: 95,
     priority: 0,
     stageMod: { name: null, amount: null },
@@ -413,11 +565,13 @@ const moves: Move[] = [
     animationType: "special",
     description:
       "The user attacks with a blade of air that slices even the sky. This may also make the target flinch.",
+    hitType: "special",
+    contact: false,
   },
   {
     name: "Smoke Screen",
     power: null,
-    type: "normal",
+    type: "Normal",
     accuracy: 100,
     priority: 0,
     stageMod: { name: "accuracy", amount: -1 },
@@ -426,11 +580,13 @@ const moves: Move[] = [
     animationType: "status",
     description:
       "The user releases an obscuring cloud of smoke or ink. It reduces the target's accuracy.",
+    hitType: "status",
+    contact: false,
   },
   {
     name: "Slash",
     power: 70,
-    type: "normal",
+    type: "Normal",
     accuracy: 100,
     priority: 0,
     stageMod: { name: null, amount: null },
@@ -439,11 +595,13 @@ const moves: Move[] = [
     animationType: "physical",
     description:
       "The target is attacked with a slash of claws or blades. Critical hits land more easily.",
+    hitType: "physical",
+    contact: true,
   },
   {
     name: "Screech",
     power: null,
-    type: "normal",
+    type: "Normal",
     accuracy: 85,
     priority: 0,
     stageMod: { name: "defense", amount: -2 },
@@ -452,6 +610,8 @@ const moves: Move[] = [
     animationType: "status",
     description:
       "An ear-splitting screech harshly lowers the target's Defense stat.",
+    hitType: "status",
+    contact: false,
   },
 ];
 //TYPES ARRAY

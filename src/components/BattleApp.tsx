@@ -340,195 +340,87 @@ const BattleApp: React.FC<PokemonProps> = () => {
 
   return (
     <div>
-      {playerTurn ? (
-        <div>
-          <div>
-            <div
-              style={{ position: "relative", left: "-100px", color: "black" }}
-            >
-              {pokemonSeed[2]?.name}
-            </div>
-            <div>
-              <HealthBar
-                currentHP={p2HP}
-                originalHP={pokemonSeed[2].stats.hp}
-              />
-              <img
-                style={{ position: "relative", left: "70px" }}
-                src={pokemonSeed[2]?.image}
-                alt={pokemonSeed[2]?.name}
-              />
-            </div>
-          </div>
-          <div>
-            <animated.img
-              style={{
-                position: "relative",
-                right: "50px",
-                zIndex: 1,
-                width: "150px",
-                height: "150px",
-
-                ...props,
-              }}
-              src={pokemonSeed[0]?.imageBack}
-              alt={pokemonSeed[0]?.name}
-            />
-            <div
-              style={{ position: "relative", left: "100px", color: "black" }}
-            >
-              {pokemonSeed[0]?.name}
-            </div>
-            <div>
-              <HealthBar
-                currentHP={p1HP}
-                originalHP={pokemonSeed[0].stats.hp}
-              />
-              <br />
-              {!hideButtons ? (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, 1fr)",
-                    gap: "16px",
-                    width: "70%",
-                    position: "relative",
-                    left: "10%",
-                  }}
-                >
-                  {pokemonSeed[0]?.moves.slice(0, 4).map((move) => (
-                    <Button
-                      variant="contained"
-                      key={move.name}
-                      onClick={() => handleMoveClick(move, "p1")}
-                      style={{
-                        backgroundColor: getColorByType(move.type),
-                        height: "100%",
-                      }}
-                    >
-                      {move.name}
-                    </Button>
-                  ))}
-                </div>
-              ) : (
-                <></>
-              )}
-            </div>
-            <div>
-              {lastMoveUsed && attacked ? (
-                <Card
-                  style={{
-                    border: "solid 2px",
-                    width: "50%",
-                    position: "relative",
-                    left: "150px",
-                  }}
-                >
-                  <p>
-                    {pokemonSeed[0].name} used {lastMoveUsed.name}
-                  </p>
-                </Card>
-              ) : (
-                <></>
-              )}
-            </div>
-          </div>
+      <div>
+        <div style={{ position: "relative", left: "-100px", color: "black" }}>
+          {pokemonSeed[2]?.name}
         </div>
-      ) : (
         <div>
-          <div>
-            <div
-              style={{ color: "black", position: "relative", left: "-100px" }}
-            >
-              {pokemonSeed[0]?.name}
-            </div>
-            <div>
-              <HealthBar
-                currentHP={p1HP}
-                originalHP={pokemonSeed[0].stats.hp}
-              />
-              <img
-                style={{ position: "relative", left: "70px" }}
-                src={pokemonSeed[0]?.image}
-                alt={pokemonSeed[0]?.name}
-              />
-            </div>
-          </div>
-          <div>
-            <animated.img
-              style={{
-                position: "relative",
-                right: "50px",
-                zIndex: 1,
-                width: "150px",
-                height: "150px",
-
-                ...props,
-              }}
-              src={pokemonSeed[2]?.imageBack}
-              alt={pokemonSeed[2]?.name}
-            />
-            <div
-              style={{ position: "relative", left: "100px", color: "black" }}
-            >
-              {pokemonSeed[2]?.name}
-            </div>
-            <div>
-              <HealthBar
-                currentHP={p2HP}
-                originalHP={pokemonSeed[2].stats.hp}
-              />
-              <br />
-              {!hideButtons ? (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, 1fr)",
-                    gap: "16px",
-                    width: "70%",
-                    position: "relative",
-                    left: "10%",
-                  }}
-                >
-                  {pokemonSeed[2]?.moves.slice(0, 4).map((move) => (
-                    <Button
-                      variant="contained"
-                      key={move.name}
-                      onClick={() => handleMoveClick(move, "p2")}
-                      style={{
-                        backgroundColor: getColorByType(move.type),
-                        height: "100%",
-                      }}
-                    >
-                      {move.name}
-                    </Button>
-                  ))}
-                </div>
-              ) : (
-                <></>
-              )}
-            </div>
-            <div>
-              {lastMoveUsed && attacked ? (
-                <Card
-                  style={{
-                    border: "solid 2px",
-                    width: "50%",
-                    position: "relative",
-                    left: "150px",
-                  }}
-                >
-                  <p>
-                    {pokemonSeed[2].name} used {lastMoveUsed.name}
-                  </p>
-                </Card>
-              ) : (
-                <></>
-              )}
-            </div>
-          </div>
+          <HealthBar currentHP={p2HP} originalHP={pokemonSeed[2].stats.hp} />
+          <img
+            style={{ position: "relative", left: "70px" }}
+            src={pokemonSeed[2]?.image}
+            alt={pokemonSeed[2]?.name}
+          />
         </div>
-      )}
+      </div>
+      <div>
+        <animated.img
+          style={{
+            position: "relative",
+            right: "50px",
+            zIndex: 1,
+            width: "150px",
+            height: "150px",
+
+            ...props,
+          }}
+          src={pokemonSeed[0]?.imageBack}
+          alt={pokemonSeed[0]?.name}
+        />
+        <div style={{ position: "relative", left: "100px", color: "black" }}>
+          {pokemonSeed[0]?.name}
+        </div>
+        <div>
+          <HealthBar currentHP={p1HP} originalHP={pokemonSeed[0].stats.hp} />
+          <br />
+          {!hideButtons ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: "16px",
+                width: "70%",
+                position: "relative",
+                left: "10%",
+              }}
+            >
+              {pokemonSeed[0]?.moves.slice(0, 4).map((move) => (
+                <Button
+                  variant="contained"
+                  key={move.name}
+                  onClick={() => handleMoveClick(move, "p1")}
+                  style={{
+                    backgroundColor: getColorByType(move.type),
+                    height: "100%",
+                  }}
+                >
+                  {move.name}
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <></>
+          )}
+        </div>
+        <div>
+          {lastMoveUsed && attacked ? (
+            <Card
+              style={{
+                border: "solid 2px",
+                width: "50%",
+                position: "relative",
+                left: "150px",
+              }}
+            >
+              <p>
+                {pokemonSeed[0].name} used {lastMoveUsed.name}
+              </p>
+            </Card>
+          ) : (
+            <></>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
